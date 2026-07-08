@@ -1,0 +1,22 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "Tinder for dev",
+  "keywords": [
+    "nodejs",
+    "javascript"
+  ],
+  "license": "ISC",
+  "author": "Rajnish Raj",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    
+    "dev": "nodemon src/app.js",
+
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
