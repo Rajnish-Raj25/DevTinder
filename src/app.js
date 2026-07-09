@@ -4,15 +4,24 @@
 
  app.use("/admin",adminAuth);
  app.get("/admin/getAll",(req,res)=>{
-    res.send("Welcome to the admin panel");
+ throw new Error("This is a test error");
+  
+   
+
+//     try{
+      
+// //  res.send("Welcome to the admin panel");
+//     }catch(err){
+//         res.status(500).send("Internal Server Error");
+//     }
  })
 
- app.post("/admin/create",(req,res)=>{
-    res.send("Admin created successfully");
- })
-app.get("/user",userAuth,(req,res)=>{
-    res.send("Welcome to the user panel");
- })
+ 
+//  wildcard routr for error handling
+app.use((err,req,res,next)=>{
+    console.error(err.stack);
+    res.status(500).send('Something went wrong!');
+  });
 
 
  
