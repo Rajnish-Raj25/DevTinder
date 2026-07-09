@@ -2,15 +2,21 @@
  const app =express();
 
 
+// multtiple routr handler
+ app.use("/user",(req,res,next)=>{
+   console.log('User route is called');
+   next();
 
- /**
- * @description Handle GET request to /user
- */
- // handle GET request to /user
- app.get(("/user/:name/:id/:age"),(req,res)=>{
-   res.send({statusCode: 200, name: req.params.name, age: req.params.age, id: req.params.id})
-   console.log(req.params)
- })
+ },(req,res,next)=>{
+   res.send('User route is called from responese ');
+   next();
+ },(req,res,next)=>{
+   console.log('User route is called');
+   next();
+ },(req,res,next)=>{
+   console.log('User route is called');
+   next();
+ } ) 
 
 
 
