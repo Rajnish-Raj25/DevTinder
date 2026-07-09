@@ -1,22 +1,21 @@
  const  express = require('express');
+ const {adminAuth,userAuth} = require("./middleware/auth");
  const app =express();
 
+ app.use("/admin",adminAuth);
+ app.get("/admin/getAll",(req,res)=>{
+    res.send("Welcome to the admin panel");
+ })
 
-// multtiple routr handler
- app.use("/user",(req,res,next)=>{
-   console.log('User route is called');
-   next();
+ app.post("/admin/create",(req,res)=>{
+    res.send("Admin created successfully");
+ })
+app.get("/user",userAuth,(req,res)=>{
+    res.send("Welcome to the user panel");
+ })
 
- },(req,res,next)=>{
-   res.send('User route is called from responese ');
-   next();
- },(req,res,next)=>{
-   console.log('User route is called');
-   next();
- },(req,res,next)=>{
-   console.log('User route is called');
-   next();
- } ) 
+
+ 
 
 
 
