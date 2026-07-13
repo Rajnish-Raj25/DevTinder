@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,11 +20,21 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Error saving in email" + value);
+        }
+      },
     },
     password: {
       type: String,
       required: true,
       minLength: 6,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Error saving in password" + value);
+        }
+      },
     },
     age: {
       type: Number,
@@ -42,6 +53,11 @@ const userSchema = new mongoose.Schema(
     photoUrl: {
       type: String,
       default: "https://bup.edu.bd/public/upload/user-dummy.jpeg",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Error saving in  photourl" + value);
+        }
+      },
     },
     about: {
       type: String,

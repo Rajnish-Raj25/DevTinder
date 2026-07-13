@@ -8,6 +8,8 @@ app.use(express.json());
 app.post("/signUp", async (req, res) => {
   const newUser = new User(req.body);
 
+  // console.log(req.body);
+
   try {
     await newUser.save();
     res.status(201).json({ message: "User created successfully" });
