@@ -62,10 +62,30 @@ app.patch("/update", async (req, res) => {
   const updateData = req.body;
 
   try {
+    const AllOWED_UPDATE = [
+      "userId",
+      "photoUrl",
+      "age",
+      "skills",
+      "about",
+      "gender",
+    ];
+
+    const isUpdateAllowed = Object.keys(updateData).every((k) =>
+      AllOWED_UPDATE.includes(k),
+    );
+    if (!isUpdateAllowed) {
+      res.send("Update not allowed");
+    }
+    if (updateData.skills.length > 10) {
+      res.send("Update not allowed, skills should not more than 10");
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       { _id: userId },
       updateData,
-      { new: true },
+
+      { runValidators: true, new: true },
     );
     if (!updatedUser) {
       return res.status(404).send({ message: "User not found" });
