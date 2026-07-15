@@ -1,27 +1,24 @@
- const adminAuth =((req,res,next)=>{
-    console.log("Admin authentication middleware called");
-    const authentictedToken ="abc123";
-    const isAuthenticated = authentictedToken === "abc123";
+const jwt = require("jsonwebtoken");
+const user = require("../models/user");
+require("dotenv").config();
 
-    if (!isAuthenticated) {
-      res.status(401).send('Unauthorized'); 
-    } else {
-      next(); 
+const userAuth = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
+    if (!token) {
+      throw new Error("Invalid Tokenß");
     }
 
- })
-
-
- const userAuth =((req,res,next)=>{
-    console.log("User authentication middleware called");
-    const authentictedToken ="xyz789";
-    const isAuthenticated = authentictedToken === "xyz789";
-
-    if (!isAuthenticated) {
-      res.status(401).send('Unauthorized'); 
-    } else {
-      next(); 
+    const isTokenValid = await jwt.verify(token, process.env.SECRET_kEY);
+    const { _id } = isTokenValid;
+    const loggedInUser = await user.findById(_id);
+    if (!loggedInUser) {
+      throw new Error("User not found");
     }
-
- })     
- module.exports = {adminAuth,userAuth};
+    req.loggedInUser = loggedInUser;
+    next();
+  } catch (error) {
+    res.status(500).send("Error :" + error.message);
+  }
+};
+module.exports = { userAuth };

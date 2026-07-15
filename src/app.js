@@ -3,11 +3,16 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignupApi } = require("./utils/validations");
 const bcrypt = require("bcrypt");
-
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth");
+require("dotenv").config();
 const app = express();
 
+app.use(cookieParser());
+
 app.use(express.json());
-//sign up api
+
 app.post("/signUp", async (req, res) => {
   const { firstName, age, lastName, email, password, skills, about, photoUrl } =
     req.body;
@@ -36,17 +41,24 @@ app.post("/signUp", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(req.body);
   try {
     const user = await User.findOne({ email });
-    console.log(user);
 
     if (!user) {
       throw new Error("Invalid Credential !!");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user?.password);
+    const isPasswordValid = await user.validatePassword(password);
+
     if (isPasswordValid) {
+      const token = await user.getJWT();
+
+      console.log(token);
+
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+      });
+
       res.send("Login successful");
     } else {
       throw new Error("Invalid Credentials");
@@ -56,107 +68,22 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//get user by email
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.email;
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const users = await User.find({ email: userEmail });
-    if (users.length === 0) {
-      res.status(404).send({ message: "User not found" });
-    } else {
-      res.status(200).send(users);
-    }
-  } catch (err) {
-    res.status(500).send({ "error on fetch": err.message });
-  }
-});
+    const userProfile = req?.loggedInUser;
 
-// feed api
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(500).send({ "error on fetch": err.message });
-  }
-});
-
-//delete user by email
-
-app.delete("/delete", async (req, res) => {
-  const userEmail = req.body.email;
-  try {
-    const deeletedUser = await User.findOneAndDelete({ email: userEmail });
-    if (!deeletedUser) {
-      return res.status(404).send({ message: "User not found" });
-    } else {
-      res.status(200).send({ message: "User deleted successfully" });
-    }
-  } catch (err) {
-    res.status(500).send({ "error on delete": err.message });
-  }
-});
-
-//update user by email
-app.patch("/update", async (req, res) => {
-  const userId = req.body.userId;
-  const updateData = req.body;
-
-  try {
-    const AllOWED_UPDATE = [
-      "userId",
-      "photoUrl",
-      "age",
-      "skills",
-      "about",
-      "gender",
-    ];
-
-    const isUpdateAllowed = Object.keys(updateData).every((k) =>
-      AllOWED_UPDATE.includes(k),
-    );
-    if (!isUpdateAllowed) {
-      res.send("Update not allowed");
-    }
-    if (updateData.skills.length > 10) {
-      res.send("Update not allowed, skills should not more than 10");
-    }
-
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: userId },
-      updateData,
-
-      { runValidators: true, new: true },
-    );
-    if (!updatedUser) {
-      return res.status(404).send({ message: "User not found" });
-    } else {
-      res.status(200).send({ message: "User updated successfully" });
-    }
-  } catch (err) {
-    res.status(500).send({ "error on update": err.message });
-  }
-});
-
-//api to get user by email and update
-
-app.patch("/updateByEmail", async (req, res) => {
-  const userEmail = req.body.email;
-  const data = req.body;
-
-  console.log(data);
-
-  try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email: userEmail },
-      data,
-      { new: true },
-    );
-    console.log(updatedUser);
-
-    res.send("user updated successfully");
+    res.status(200).send(userProfile);
   } catch (error) {
-    res.send("something went worng", error);
+    res.status(500).send("Error :" + error.message);
+  }
+});
+
+app.post("/sendConectionReq", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.loggedInUser;
+    res.send(loggedInUser?.firstName + " send connection request");
+  } catch (error) {
+    res.status(400).send("Error:" + error.message);
   }
 });
 
