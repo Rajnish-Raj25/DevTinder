@@ -7,6 +7,7 @@ const { userAuth } = require("./middleware/auth");
 const authRouter = require("./router/auth");
 const profileRouter = require("./router/profile");
 const requestRouter = require("./router/request");
+const userRouter = require("./router/user");
 require("dotenv").config();
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
   .then(() => {
