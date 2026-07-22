@@ -83,11 +83,6 @@ requestRouter.post(
       res.json({
         message: "Request " + status + " Successfully",
       });
-
-      // validate the status
-      //loginit=touserId
-      //status interested
-      // requestis should be valid
     } catch (error) {
       res.send("Error :" + error.message);
     }
